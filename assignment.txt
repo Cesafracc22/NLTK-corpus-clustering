@@ -2,4 +2,4 @@ Implement a python technology employing NLTK (or alternatively, a JAVA technolog
 employing OPENNLP) that, given a corpus (suggestion for test, the reuters repo
 nltk.corpus.reuters), executes one and only one of the following tasks:
 Clusters the corpus in a specified number of classes based on the cosine similarity
-measure by a classical clustering method, such as K-nearest Neighbours;
+measure by a classical clustering method, such as K-means;
