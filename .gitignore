@@ -165,5 +165,11 @@ __marimo__/
 # Roadmap
 roadmap.md
 
-# Local preprocessing notes (do not track)
-nltk-implementation/src/preprocessing/prerprocess.md
+# LaTeX build
+docs/report/%OUTDIR%/
+docs/report/*.synctex.gz
+
+# Data (vectors, models, nltk_data)
+data/
+nltk-implementation/
+scikit-learn-implementation/
