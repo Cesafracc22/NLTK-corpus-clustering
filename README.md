@@ -1,5 +1,8 @@
 # NLTK Corpus Clustering
 
+
+## PLEASE READ `report.pdf` FOR FULL PROJECT REPORT.THIS README CONTAINS INFORMATION ABOUT PROGRAM USAGE AND CODE SPECIFICS. 
+
 Clusters the **Reuters** corpus into a specified number of classes using K-Means, with document vectors from TF-IDF or Word2Vec and optional cosine or Euclidean distance.
 
 ## Overview
@@ -52,10 +55,17 @@ Preprocesses the Reuters corpus and writes document vectors to CSV (and optional
 
 Outputs go to `{output_dir}/{embedding}/` or `{output_dir}/{embedding}-svd{N}/` (e.g. `train.csv`, `test.csv` if `--split`).
 
-**Example**
+**Examples**
 
 ```bash
+# Custom TF-IDF + SVD 300 (with train/test split)
+python scripts/preprocess.py --tokenize --stopwords --embedding tfidf-custom --svd 300 --split
+
+# Scikit-learn TF-IDF + SVD 300
 python scripts/preprocess.py --tokenize --stopwords --embedding tfidf-scikit-learn --svd 300 --split
+
+# Word2Vec (no SVD; 100 dims)
+python scripts/preprocess.py --tokenize --stopwords --embedding word2vec --split
 ```
 
 ---
@@ -75,10 +85,17 @@ Runs K-Means on a vectors CSV and saves the fitted model.
 
 Models are saved as `kmeans_v1.joblib`, `kmeans_v2.joblib`, … under `models_dir`.
 
-**Example**
+**Examples**
 
 ```bash
-python scripts/cluster.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --n_clusters 8 --distance cosine
+# Train on custom TF-IDF (SVD=300), k=6, cosine, 5 repeats
+python scripts/cluster.py --input data/vectors/tfidf-custom-svd300/train.csv --n_clusters 6 --distance cosine --repeats 5
+
+# Train on scikit-learn TF-IDF (SVD=300)
+python scripts/cluster.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --n_clusters 6 --distance cosine --repeats 5
+
+# Train on Word2Vec
+python scripts/cluster.py --input data/vectors/word2vec/train.csv --n_clusters 6 --distance cosine --repeats 5
 ```
 
 ---
@@ -98,10 +115,17 @@ Sweeps over \(k\) and writes WCSS to CSV (for elbow plots or model selection).
 | `--sample_ratio` | No | 1.0 | Fraction of rows to use (e.g. 0.5 for faster sweep) |
 | `--output_dir` | No | `data/models/tune` | Where to write `wcss_results.csv` |
 
-**Example**
+**Examples**
 
 ```bash
-python scripts/tune.py --input data/vectors/word2vec/train.csv --k_min 3 --k_max 12 --output_dir data/models/tune/word2vec
+# Tune k for custom TF-IDF vectors (writes data/models/tune/tfidf-custom/wcss_results.csv)
+python scripts/tune.py --input data/vectors/tfidf-custom-svd300/train.csv --k_min 3 --k_max 12 --repeats 5 --output_dir data/models/tune/tfidf-custom
+
+# Tune k for scikit-learn TF-IDF
+python scripts/tune.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --k_min 3 --k_max 12 --repeats 5 --output_dir data/models/tune/tfidf-scikit-learn
+
+# Tune k for Word2Vec
+python scripts/tune.py --input data/vectors/word2vec/train.csv --k_min 3 --k_max 12 --repeats 5 --output_dir data/models/tune/word2vec
 ```
 
 ---
@@ -115,28 +139,61 @@ Loads a saved K-Means model and test vectors, then prints WCSS, Silhouette, and 
 | `--model` | Yes | — | Path to `.joblib` model |
 | `--input` | Yes | — | Path to test vectors CSV |
 
-**Example**
+**Examples**
+
+Use the same embedding (and SVD) for test vectors as for the model you trained.
 
 ```bash
-python scripts/evaluate.py --model data/models/kmeans_v1.joblib --input data/vectors/tfidf-scikit-learn-svd300/test.csv
+# Evaluate a model trained on custom TF-IDF (SVD=300)
+python scripts/evaluate.py --model data/models/kmeans_v1.joblib --input data/vectors/tfidf-custom-svd300/test.csv
+
+# Evaluate a model trained on scikit-learn TF-IDF (SVD=300)
+python scripts/evaluate.py --model data/models/kmeans_v2.joblib --input data/vectors/tfidf-scikit-learn-svd300/test.csv
+
+# Evaluate a model trained on Word2Vec
+python scripts/evaluate.py --model data/models/kmeans_v3.joblib --input data/vectors/word2vec/test.csv
 ```
+
+(Replace `kmeans_v1.joblib`, `kmeans_v2.joblib`, etc. with the actual model paths printed by `cluster.py`.)
 
 ---
 
-## Typical workflow
+## Full workflow example
+
+Run from the repository root. Below: one pipeline for **custom TF-IDF**, one for **scikit-learn TF-IDF**, one for **Word2Vec**.
+
+### Custom TF-IDF (with SVD)
 
 ```bash
-# 1. Preprocess and embed (with train/test split)
+# 1. Preprocess
+python scripts/preprocess.py --tokenize --stopwords --embedding tfidf-custom --svd 300 --split
+
+# 2. (Optional) Tune k for deciding best k (elbow method used in project)
+python scripts/tune.py --input data/vectors/tfidf-custom-svd300/train.csv --k_min 3 --k_max 12 --repeats 5 --output_dir data/models/tune/tfidf-custom
+
+# 3. Train (e.g. k=6)
+python scripts/cluster.py --input data/vectors/tfidf-custom-svd300/train.csv --n_clusters 6 --distance cosine --repeats 5
+
+# 4. Evaluate (use the path printed in step 3 for --model)
+python scripts/evaluate.py --model data/models/kmeans_v1.joblib --input data/vectors/tfidf-custom-svd300/test.csv
+```
+
+### Scikit-learn TF-IDF (with SVD)
+
+```bash
 python scripts/preprocess.py --tokenize --stopwords --embedding tfidf-scikit-learn --svd 300 --split
+python scripts/tune.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --k_min 3 --k_max 12 --repeats 5 --output_dir data/models/tune/tfidf-scikit-learn
+python scripts/cluster.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --n_clusters 6 --distance cosine --repeats 5
+python scripts/evaluate.py --model data/models/kmeans_v2.joblib --input data/vectors/tfidf-scikit-learn-svd300/test.csv
+```
 
-# 2. (Optional) Tune k
-python scripts/tune.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --k_min 3 --k_max 12
+### Word2Vec
 
-# 3. Train final model
-python scripts/cluster.py --input data/vectors/tfidf-scikit-learn-svd300/train.csv --n_clusters 8 --distance cosine
-
-# 4. Evaluate on test set
-python scripts/evaluate.py --model data/models/kmeans_v1.joblib --input data/vectors/tfidf-scikit-learn-svd300/test.csv
+```bash
+python scripts/preprocess.py --tokenize --stopwords --embedding word2vec --split
+python scripts/tune.py --input data/vectors/word2vec/train.csv --k_min 3 --k_max 12 --repeats 5 --output_dir data/models/tune/word2vec
+python scripts/cluster.py --input data/vectors/word2vec/train.csv --n_clusters 6 --distance cosine --repeats 5
+python scripts/evaluate.py --model data/models/kmeans_v3.joblib --input data/vectors/word2vec/test.csv
 ```
 
 ## Dependencies
