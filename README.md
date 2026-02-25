@@ -171,7 +171,7 @@ Loads a saved K-Means model and test vectors, then prints WCSS, Silhouette, and 
 **Examples**
 
 Use the same embedding (and SVD) for test vectors as for the model you trained.
-
+Use the correct version of the joblib (v1,v2,...)
 ```bash
 # Evaluate a model trained on custom TF-IDF (SVD=300)
 python scripts/evaluate.py --model data/models/kmeans_v1.joblib --input data/vectors/tfidf-custom-svd300/test.csv
