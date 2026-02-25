@@ -15,6 +15,35 @@ Clusters the **Reuters** corpus into a specified number of classes using K-Means
 
 Outputs are CSV vectors and serialized models under `data/`.
 
+### Environment setup / Install requirements
+
+Install dependencies with **pip** or **conda** (run from the repository root).
+
+**Option A – pip**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate   # Linux/macOS
+# .venv\Scripts\activate    # Windows
+
+pip install -r requirements.txt
+```
+
+**Option B – conda**
+
+```bash
+conda env create -f environment.yml
+conda activate nlp-corpus-clustering
+```
+
+After that, download NLTK data once with:
+
+```bash
+python scripts/download_nltk_data.py
+```
+
+Then you can run the pipeline (preprocess, tune, cluster, evaluate) as described below.
+
 ## Project layout
 
 ```
