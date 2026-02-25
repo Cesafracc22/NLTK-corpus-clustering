@@ -19,7 +19,7 @@ Outputs are CSV vectors and serialized models under `data/`.
 │   ├── load_data.py     # Reuters loading, NLTK data under data/nltk_data
 │   ├── text_processing.py
 │   ├── embeddings.py    # tfidf-custom, tfidf-scikit-learn, word2vec
-│   └── kmeans.py        # KMeansModel (sklearn/normalized for cosine)
+│   └── kmeans.py        # KMeansModel (NLTK KMeansClusterer, cosine, L2 norm)
 ├── scripts/
 │   ├── preprocess.py    # Corpus → vectors CSV
 │   ├── cluster.py       # Vectors → K-Means → save model
